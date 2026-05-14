@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EzeLink — Short links, made easy</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    /* Hero */
+    .hero { text-align:center; padding:80px 0 56px; }
+
+    .hero-pill {
+      display:inline-flex; align-items:center; gap:8px;
+      background:linear-gradient(135deg,#fff0f7,#f0eeff);
+      border:1.5px solid #e0c8f7; border-radius:100px;
+      padding:7px 18px; font-size:0.8rem; font-weight:700;
+      color:var(--purple); letter-spacing:0.04em;
+      text-transform:uppercase; margin-bottom:28px;
+      animation:fadeUp 0.5s ease both;
+    }
+
+    .hero h1 {
+      font-family:var(--font-head); font-size:clamp(3rem,8vw,6rem);
+      font-weight:900; line-height:1.0; letter-spacing:-0.03em;
+      margin-bottom:22px; animation:fadeUp 0.5s ease 0.1s both;
+    }
+
+    .hero p {
+      font-size:1.15rem; color:var(--text-2); font-weight:500;
+      max-width:460px; margin:0 auto 44px;
+      animation:fadeUp 0.5s ease 0.2s both; line-height:1.7;
+    }
+
+    /* Shortener card */
+    .shortener {
+      background:var(--bg-2); border:1.5px solid var(--border);
+      border-radius:24px; padding:36px; max-width:700px;
+      margin:0 auto 64px; box-shadow:var(--shadow-lg);
+      position:relative; overflow:hidden;
+      animation:fadeUp 0.5s ease 0.3s both;
+    }
+
+    .shortener::before {
+      content:''; position:absolute; top:0; left:0; right:0;
+      height:3px; background:var(--grad-1);
+    }
+
+    .shorten-label {
+      font-size:1rem; font-weight:800; color:var(--text);
+      margin-bottom:16px; display:flex; align-items:center; gap:8px;
+    }
+
+    .url-row { display:flex; gap:12px; }
+    .url-row .input { flex:1; font-size:1rem; padding:14px 18px; border-radius:var(--radius); }
+    .url-row .btn   { padding:14px 28px; border-radius:var(--radius); font-size:0.95rem; }
+
+    .adv-toggle {
+      background:none; border:none; cursor:pointer;
+      color:var(--text-3); font-size:0.85rem; font-weight:600;
+      font-family:var(--font-body); padding:0; margin-top:14px;
+      display:flex; align-items:center; gap:6px; transition:color 0.2s;
+    }
+    .adv-toggle:hover { color:var(--purple); }
+
+    .adv-opts {
+      display:none; gap:14px; margin-top:18px;
+      padding-top:18px; border-top:1.5px solid var(--border);
+    }
+    .adv-opts.open { display:flex; }
+
+    /* Result */
+    .result {
+      display:none; margin-top:20px;
+      background:linear-gradient(135deg,#fff0f7,#f0eeff,#eef4ff);
+      border:1.5px solid #d8c4f7; border-radius:var(--radius); padding:20px 24px;
+    }
+    .result.show { display:block; }
+    .result-label { font-size:0.75rem; font-weight:800; color:var(--purple); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px; }
+    .result-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    .result-url {
+      font-family:var(--font-head); font-size:1.6rem; font-weight:900;
+      letter-spacing:-0.02em; text-decoration:none; flex:1;
+      background:var(--grad-1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+
+    /* Stats */
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; max-width:700px; margin:0 auto 72px; }
+    .stat-card {
+      background:var(--bg-2); border:1.5px solid var(--border);
+      border-radius:var(--radius); padding:28px 20px; text-align:center;
+      box-shadow:var(--shadow-sm); transition:all 0.25s;
+    }
+    .stat-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-md); }
+    .stat-num { font-family:var(--font-head); font-size:2.2rem; font-weight:900; line-height:1; }
+    .stat-lbl { font-size:0.82rem; font-weight:600; color:var(--text-3); margin-top:6px; text-transform:uppercase; letter-spacing:0.04em; }
+
+    /* Features */
+    .section-title { font-family:var(--font-head); font-size:2rem; font-weight:900; letter-spacing:-0.02em; margin-bottom:28px; }
+    .features { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; margin-bottom:80px; }
+    .feature {
+      background:var(--bg-2); border:1.5px solid var(--border);
+      border-radius:var(--radius); padding:28px;
+      box-shadow:var(--shadow-sm); transition:all 0.3s;
+    }
+    .feature:hover { transform:translateY(-5px); box-shadow:var(--shadow-md); border-color:var(--border-2); }
+    .feature-icon {
+      width:48px; height:48px; border-radius:12px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.4rem; margin-bottom:16px;
+    }
+    .feature h3 { font-family:var(--font-head); font-size:1.1rem; font-weight:700; margin-bottom:8px; }
+    .feature p  { font-size:0.88rem; color:var(--text-2); line-height:1.65; }
+
+    .fi-1 { background:linear-gradient(135deg,#fff0f7,#fce4f5); }
+    .fi-2 { background:linear-gradient(135deg,#eef4ff,#dce8ff); }
+    .fi-3 { background:linear-gradient(135deg,#f3eeff,#e8d8ff); }
+    .fi-4 { background:linear-gradient(135deg,#efffef,#d4f7d4); }
+
+    /* Auth nudge */
+    .auth-nudge {
+      display:none; margin-top:18px;
+      background:#fffbeb; border:1.5px solid #fde68a;
+      border-radius:var(--radius-sm); padding:14px 18px;
+      font-size:0.88rem; color:#92400e; font-weight:500; text-align:center;
+    }
+    .auth-nudge a { color:var(--purple); font-weight:700; text-decoration:none; }
+
+    @media(max-width:600px) {
+      .url-row { flex-direction:column; }
+      .stats { gap:12px; }
+      .stat-num { font-size:1.7rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-dots"></div>
+  <div class="bg-blob bg-blob-1"></div>
+  <div class="bg-blob bg-blob-2"></div>
+  <div class="bg-blob bg-blob-3"></div>
+  <div id="toast-container"></div>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">⚡ EzeLink</a>
+      <div class="nav-links">
+        <a href="index.html"     class="nav-link active hide-mobile">Home</a>
+        <a href="dashboard.html" class="nav-link hide-mobile" data-auth="true">Dashboard</a>
+        <a href="login.html"     class="nav-link" data-auth="false">Login</a>
+        <a href="register.html"  class="btn btn-primary btn-sm" data-auth="false">Get started →</a>
+        <span class="nav-link hide-mobile" id="nav-email" data-auth="true" style="color:var(--text-3)"></span>
+        <a href="dashboard.html" class="btn btn-secondary btn-sm" data-auth="true">Dashboard</a>
+        <button onclick="logout()" class="btn btn-ghost btn-sm" data-auth="true">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-pill">✨ Fast · Trackable · Free</div>
+      <h1>Links made<br/><span class="grad">eze.</span></h1>
+      <p>Shorten any URL in seconds. Track every click. Share with confidence.</p>
+    </section>
+
+    <!-- Shortener -->
+    <div class="shortener">
+      <div class="shorten-label">🔗 Shorten your URL</div>
+      <div class="url-row">
+        <input id="url-input" class="input" type="url" placeholder="Paste your long URL here…" autocomplete="off"/>
+        <button class="btn btn-primary" onclick="doShorten()" id="shorten-btn">
+          Shorten ✨
+        </button>
+      </div>
+
+      <button class="adv-toggle" onclick="toggleAdv()">
+        <span id="adv-arr">▸</span> Advanced options
+      </button>
+
+      <div class="adv-opts" id="adv-opts">
+        <div class="field" style="flex:1">
+          <label class="field-label">Custom slug</label>
+          <input id="custom-slug" class="input" placeholder="e.g. my-brand"/>
+        </div>
+        <div class="field" style="flex:1">
+          <label class="field-label">Expires at</label>
+          <input id="expires-at" class="input" type="datetime-local"/>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div class="result" id="result">
+        <div class="result-label">🎉 Your short link is ready!</div>
+        <div class="result-row">
+          <a id="result-url" class="result-url" target="_blank" href="#"></a>
+          <button class="btn btn-secondary btn-sm" onclick="copyResult(this)">📋 Copy</button>
+          <a id="result-stats" href="#" class="btn btn-ghost btn-sm">📊 Analytics</a>
+        </div>
+      </div>
+
+      <!-- Auth nudge -->
+      <div class="auth-nudge" id="auth-nudge">
+        You need an account to shorten URLs.
+        <a href="login.html">Login</a> or <a href="register.html">register free</a> to get started.
+      </div>
+    </div>
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-num grad">∞</div>
+        <div class="stat-lbl">Links shortened</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num grad2">&lt;1ms</div>
+        <div class="stat-lbl">Redirect speed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num grad3">100%</div>
+        <div class="stat-lbl">Uptime</div>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <div class="section-title">Why <span class="grad">EzeLink?</span></div>
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon fi-1">⚡</div>
+        <h3>Blazing fast</h3>
+        <p>Redis-powered caching serves every redirect in under 1ms. Your audience never waits.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon fi-2">📊</div>
+        <h3>Real analytics</h3>
+        <p>See clicks by country, track daily trends, and understand your audience with live data.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon fi-3">🔒</div>
+        <h3>Secure by design</h3>
+        <p>JWT authentication and rate limiting keep your account and links protected at all times.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon fi-4">🎯</div>
+        <h3>Custom slugs</h3>
+        <p>Create branded links like ezelink.io/my-product instead of random characters.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    updateNav();
+
+    function toggleAdv() {
+      const o = document.getElementById('adv-opts');
+      const a = document.getElementById('adv-arr');
+      o.classList.toggle('open');
+      a.textContent = o.classList.contains('open') ? '▾' : '▸';
+    }
+
+    async function doShorten() {
+      if (!auth.isLoggedIn()) {
+        document.getElementById('auth-nudge').style.display = 'block';
+        return;
+      }
+      const url    = document.getElementById('url-input').value.trim();
+      const slug   = document.getElementById('custom-slug').value.trim();
+      const expiry = document.getElementById('expires-at').value;
+      const btn    = document.getElementById('shorten-btn');
+
+      if (!url) { toast('Please enter a URL first', 'error'); return; }
+
+      btn.innerHTML = '<span class="spinner"></span> Shortening…';
+      btn.disabled = true;
+
+      try {
+        const body = { url };
+        if (slug)   body.custom_slug = slug;
+        if (expiry) body.expires_at  = new Date(expiry).toISOString();
+
+        const data = await api.post('/shorten', body);
+        saveSlug(data.slug);
+
+        document.getElementById('result-url').textContent = data.short_url;
+        document.getElementById('result-url').href        = data.short_url;
+        document.getElementById('result-stats').href      = `analytics.html?slug=${data.slug}`;
+        document.getElementById('result').classList.add('show');
+        document.getElementById('auth-nudge').style.display = 'none';
+        document.getElementById('url-input').value = '';
+        toast('Short link created! 🎉');
+      } catch(e) {
+        toast(e.message, 'error');
+      } finally {
+        btn.innerHTML = 'Shorten ✨';
+        btn.disabled  = false;
+      }
+    }
+
+    function copyResult(btn) {
+      const url = document.getElementById('result-url').textContent;
+      copyText(url, btn);
+      toast('Copied to clipboard!');
+    }
+
+    document.getElementById('url-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doShorten();
+    });
+  </script>
+</body>
+</html>

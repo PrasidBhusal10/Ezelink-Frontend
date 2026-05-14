@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — EzeLink</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    .page-wrap { padding:40px 0 80px; }
+
+    /* Header */
+    .dash-header { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:32px; }
+    .dash-title { font-family:var(--font-head); font-size:2.4rem; font-weight:900; letter-spacing:-0.03em; line-height:1.1; }
+    .dash-sub { color:var(--text-2); font-size:0.95rem; font-weight:500; margin-top:6px; }
+
+    /* Quick shorten */
+    .quick-box {
+      background:var(--bg-2); border:1.5px solid var(--border);
+      border-radius:var(--radius); padding:24px 28px;
+      box-shadow:var(--shadow-sm); margin-bottom:32px;
+      position:relative; overflow:hidden;
+    }
+    .quick-box::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--grad-1); }
+    .quick-label { font-size:0.82rem; font-weight:800; color:var(--text-3); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:12px; }
+    .quick-row { display:flex; gap:12px; }
+    .quick-row .input { flex:1; }
+
+    /* Links section */
+    .links-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .links-title { font-family:var(--font-head); font-size:1.2rem; font-weight:800; }
+    .links-count { font-size:0.85rem; font-weight:600; color:var(--text-3); }
+
+    /* Link card */
+    .link-card {
+      background:var(--bg-2); border:1.5px solid var(--border);
+      border-radius:var(--radius); padding:20px 24px;
+      display:flex; align-items:center; gap:20px;
+      box-shadow:var(--shadow-sm); transition:all 0.2s;
+      animation:fadeUp 0.4s ease both;
+    }
+    .link-card:hover { border-color:var(--border-2); box-shadow:var(--shadow-md); transform:translateY(-2px); }
+
+    .link-icon {
+      width:44px; height:44px; border-radius:12px;
+      background:linear-gradient(135deg,#fff0f7,#f0eeff);
+      border:1.5px solid #e0c8f7;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.2rem; flex-shrink:0;
+    }
+
+    .link-body { flex:1; min-width:0; }
+    .link-short {
+      font-family:var(--font-head); font-size:1.1rem; font-weight:800;
+      letter-spacing:-0.01em; text-decoration:none;
+      background:var(--grad-1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+      display:inline-block;
+    }
+    .link-original {
+      font-size:0.85rem; color:var(--text-3); font-weight:500;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      max-width:380px; margin-top:3px;
+    }
+    .link-meta { display:flex; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap; }
+
+    .click-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      background:#fff0f7; color:var(--pink);
+      border:1.5px solid #fbc4df; border-radius:100px;
+      padding:3px 11px; font-size:0.78rem; font-weight:800;
+    }
+
+    .time-label { font-size:0.78rem; color:var(--text-3); font-weight:500; }
+
+    .link-actions { display:flex; gap:8px; flex-shrink:0; }
+
+    /* Confirm dialog */
+    .dialog-box {
+      background:var(--bg-2); border:1.5px solid var(--border);
+      border-radius:20px; padding:36px; max-width:380px;
+      width:90%; text-align:center; box-shadow:var(--shadow-xl);
+      animation:fadeUp 0.3s ease both;
+    }
+    .dialog-icon { font-size:2.5rem; margin-bottom:16px; }
+    .dialog-box h3 { font-family:var(--font-head); font-size:1.4rem; font-weight:800; margin-bottom:8px; }
+    .dialog-box p { color:var(--text-2); font-size:0.9rem; margin-bottom:28px; line-height:1.6; }
+    .dialog-actions { display:flex; gap:12px; justify-content:center; }
+
+    .links-list { display:flex; flex-direction:column; gap:12px; }
+
+    @media(max-width:600px) { .quick-row { flex-direction:column; } .link-actions .hide-mobile { display:none; } }
+  </style>
+</head>
+<body>
+  <div class="bg-dots"></div>
+  <div class="bg-blob bg-blob-3" style="opacity:0.06"></div>
+  <div id="toast-container"></div>
+
+  <!-- Confirm delete dialog -->
+  <div class="overlay" id="confirm-overlay">
+    <div class="dialog-box">
+      <div class="dialog-icon">🗑️</div>
+      <h3>Delete this link?</h3>
+      <p>The short URL will stop working immediately. Anyone with the link will get a 404 error. This cannot be undone.</p>
+      <div class="dialog-actions">
+        <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+        <button class="btn btn-danger" onclick="confirmDelete()">Yes, delete it</button>
+      </div>
+    </div>
+  </div>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">⚡ EzeLink</a>
+      <div class="nav-links">
+        <a href="index.html"     class="nav-link hide-mobile">Home</a>
+        <a href="dashboard.html" class="nav-link active">Dashboard</a>
+        <span class="nav-link hide-mobile" id="nav-email" style="color:var(--text-3);font-size:0.85rem"></span>
+        <button onclick="logout()" class="btn btn-ghost btn-sm">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-wrap">
+
+      <!-- Header -->
+      <div class="dash-header">
+        <div>
+          <div class="dash-title">My Links <span class="grad">✦</span></div>
+          <div class="dash-sub">Manage and track all your shortened URLs</div>
+        </div>
+        <a href="index.html" class="btn btn-primary">+ Shorten new URL</a>
+      </div>
+
+      <!-- Quick shorten -->
+      <div class="quick-box">
+        <div class="quick-label">⚡ Quick shorten</div>
+        <div class="quick-row">
+          <input id="quick-url" class="input" type="url" placeholder="Paste any URL to shorten instantly…"/>
+          <button class="btn btn-primary" onclick="quickShorten()" id="quick-btn">Shorten</button>
+        </div>
+      </div>
+
+      <!-- Links list -->
+      <div class="links-bar">
+        <div class="links-title">Your links</div>
+        <div class="links-count" id="link-count"></div>
+      </div>
+
+      <div class="links-list" id="links-list">
+        <div style="text-align:center;padding:48px;color:var(--text-3)">
+          <span class="spinner spinner-dark"></span>
+          <p style="margin-top:14px;font-weight:600">Loading your links…</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    if (!requireAuth()) throw new Error();
+    updateNav();
+
+    const BASE = 'http://localhost:8000';
+    let slugToDelete = null;
+
+    // ── Load links ────────────────────────────────────────────────────────────
+    async function loadLinks() {
+      const slugs = getSavedSlugs();
+      const list  = document.getElementById('links-list');
+
+      if (!slugs.length) {
+        list.innerHTML = `
+          <div class="empty">
+            <span class="empty-icon">🔗</span>
+            <h3>No links yet</h3>
+            <p>Paste a URL in the quick shorten box above to create your first short link.</p>
+          </div>`;
+        document.getElementById('link-count').textContent = '';
+        return;
+      }
+
+      const results = await Promise.allSettled(slugs.map(s => api.get(`/info/${s}`)));
+      const links   = results.map(r => r.status === 'fulfilled' ? r.value : null).filter(Boolean);
+
+      document.getElementById('link-count').textContent = `${links.length} link${links.length !== 1 ? 's' : ''}`;
+
+      if (!links.length) {
+        list.innerHTML = `<div class="empty"><span class="empty-icon">🔗</span><h3>No active links</h3><p>Your deleted links won't appear here.</p></div>`;
+        return;
+      }
+
+      list.innerHTML = links.map((l, i) => `
+        <div class="link-card" style="animation-delay:${i * 0.05}s">
+          <div class="link-icon">🔗</div>
+          <div class="link-body">
+            <a href="${BASE}/${l.slug}" target="_blank" class="link-short">
+              ezelink.io/${l.slug}
+            </a>
+            <div class="link-original" title="${l.original_url}">${truncate(l.original_url, 60)}</div>
+            <div class="link-meta">
+              <span class="click-badge">📊 ${l.click_count} click${l.click_count !== 1 ? 's' : ''}</span>
+              <span class="time-label">Created ${timeAgo(l.created_at)}</span>
+            </div>
+          </div>
+          <div class="link-actions">
+            <button class="btn btn-ghost btn-sm hide-mobile" title="Copy link" onclick='copyText("${BASE}/${l.slug}", this)'>📋 Copy</button>
+            <a href="analytics.html?slug=${l.slug}" class="btn btn-secondary btn-sm">📊 Stats</a>
+            <button class="btn btn-danger btn-sm" title="Delete" onclick="askDelete('${l.slug}')">🗑</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ── Quick shorten ─────────────────────────────────────────────────────────
+    async function quickShorten() {
+      const url = document.getElementById('quick-url').value.trim();
+      const btn = document.getElementById('quick-btn');
+      if (!url) { toast('Please enter a URL', 'error'); return; }
+
+      btn.innerHTML = '<span class="spinner"></span>';
+      btn.disabled  = true;
+
+      try {
+        const data = await api.post('/shorten', { url });
+        saveSlug(data.slug);
+        toast(`Created: ${data.short_url} 🎉`);
+        document.getElementById('quick-url').value = '';
+        await loadLinks();
+      } catch(e) {
+        toast(e.message, 'error');
+      } finally {
+        btn.textContent = 'Shorten';
+        btn.disabled = false;
+      }
+    }
+
+    // ── Delete ────────────────────────────────────────────────────────────────
+    function askDelete(slug) {
+      slugToDelete = slug;
+      document.getElementById('confirm-overlay').classList.add('show');
+    }
+    function closeConfirm() {
+      slugToDelete = null;
+      document.getElementById('confirm-overlay').classList.remove('show');
+    }
+    async function confirmDelete() {
+      if (!slugToDelete) return;
+      try {
+        await api.delete(`/${slugToDelete}`);
+        const s = getSavedSlugs().filter(x => x !== slugToDelete);
+        localStorage.setItem('ez_slugs', JSON.stringify(s));
+        toast('Link deleted');
+        closeConfirm();
+        await loadLinks();
+      } catch(e) {
+        toast(e.message, 'error');
+        closeConfirm();
+      }
+    }
+
+    document.getElementById('quick-url').addEventListener('keydown', e => { if (e.key==='Enter') quickShorten(); });
+    loadLinks();
+  </script>
+</body>
+</html>

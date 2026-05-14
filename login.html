@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — EzeLink</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body { display:flex; min-height:100vh; }
+
+    .auth-side {
+      flex:1; display:flex; align-items:center; justify-content:center;
+      padding:40px 24px; position:relative; z-index:1;
+    }
+
+    .auth-panel {
+      width:100%; max-width:420px;
+      animation:fadeUp 0.5s ease both;
+    }
+
+    .auth-back {
+      display:inline-flex; align-items:center; gap:6px;
+      color:var(--text-3); text-decoration:none; font-size:0.88rem;
+      font-weight:600; margin-bottom:36px; transition:color 0.2s;
+    }
+    .auth-back:hover { color:var(--purple); }
+
+    .auth-head { margin-bottom:36px; }
+    .auth-head h1 {
+      font-family:var(--font-head); font-size:2.2rem; font-weight:900;
+      letter-spacing:-0.03em; margin-bottom:8px;
+    }
+    .auth-head p { color:var(--text-2); font-size:0.95rem; font-weight:500; }
+
+    .auth-form { display:flex; flex-direction:column; gap:18px; }
+
+    .auth-divider {
+      text-align:center; color:var(--text-3);
+      font-size:0.82rem; font-weight:600; margin:8px 0;
+      position:relative;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content:''; position:absolute; top:50%; width:42%;
+      height:1.5px; background:var(--border);
+    }
+    .auth-divider::before { left:0; }
+    .auth-divider::after  { right:0; }
+
+    .auth-switch {
+      text-align:center; margin-top:24px;
+      font-size:0.9rem; color:var(--text-2); font-weight:500;
+    }
+    .auth-switch a { color:var(--purple); font-weight:700; text-decoration:none; }
+    .auth-switch a:hover { text-decoration:underline; }
+
+    /* Right decorative panel — hidden on mobile */
+    .deco-side {
+      width:420px; flex-shrink:0;
+      background:linear-gradient(145deg,#f72585,#7209b7,#3a86ff);
+      display:flex; align-items:center; justify-content:center;
+      padding:60px 48px; position:relative; overflow:hidden;
+    }
+    .deco-side::before {
+      content:''; position:absolute; inset:0;
+      background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .deco-content { position:relative; color:white; text-align:center; }
+    .deco-logo { font-family:var(--font-head); font-size:2.5rem; font-weight:900; margin-bottom:24px; }
+    .deco-text { font-size:1.1rem; font-weight:600; line-height:1.6; opacity:0.92; margin-bottom:36px; }
+    .deco-perks { display:flex; flex-direction:column; gap:14px; text-align:left; }
+    .deco-perk {
+      display:flex; align-items:center; gap:12px;
+      background:rgba(255,255,255,0.15); border-radius:var(--radius-sm);
+      padding:12px 16px; font-size:0.9rem; font-weight:600;
+    }
+    .deco-perk-icon { font-size:1.2rem; flex-shrink:0; }
+
+    @media(max-width:768px) { .deco-side { display:none; } }
+  </style>
+</head>
+<body>
+  <div class="bg-dots"></div>
+  <div class="bg-blob bg-blob-2" style="opacity:0.06"></div>
+  <div id="toast-container"></div>
+
+  <!-- Auth form side -->
+  <div class="auth-side">
+    <div class="auth-panel">
+      <a href="index.html" class="auth-back">← Back to EzeLink</a>
+
+      <div class="auth-head">
+        <h1>Welcome back <span class="grad">👋</span></h1>
+        <p>Login to manage your links and see analytics.</p>
+      </div>
+
+      <form class="auth-form" onsubmit="doLogin(event)">
+        <div class="field">
+          <label class="field-label">Email address</label>
+          <input id="email" class="input" type="email"
+            placeholder="you@example.com" autocomplete="email" required/>
+        </div>
+        <div class="field">
+          <label class="field-label">Password</label>
+          <input id="password" class="input" type="password"
+            placeholder="Enter your password" autocomplete="current-password" required/>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg" id="login-btn">
+          Login to EzeLink
+        </button>
+      </form>
+
+      <div class="auth-switch" style="margin-top:28px">
+        Don't have an account?
+        <a href="register.html">Create one free →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Decorative right panel -->
+  <div class="deco-side">
+    <div class="deco-content">
+      <div class="deco-logo">⚡ EzeLink</div>
+      <div class="deco-text">Short links, big impact.<br/>Track every click.</div>
+      <div class="deco-perks">
+        <div class="deco-perk"><span class="deco-perk-icon">⚡</span> Redirects in under 1ms</div>
+        <div class="deco-perk"><span class="deco-perk-icon">📊</span> Real-time click analytics</div>
+        <div class="deco-perk"><span class="deco-perk-icon">🌍</span> Country-level tracking</div>
+        <div class="deco-perk"><span class="deco-perk-icon">🎯</span> Custom branded slugs</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    if (auth.isLoggedIn()) window.location.href = 'dashboard.html';
+
+    async function doLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      btn.innerHTML = '<span class="spinner"></span> Logging in…';
+      btn.disabled = true;
+
+      try {
+        const data = await api.login(
+          document.getElementById('email').value,
+          document.getElementById('password').value
+        );
+        auth.save(data.access_token, data.email);
+        toast('Welcome back! 👋');
+        setTimeout(() => window.location.href = 'dashboard.html', 600);
+      } catch(e) {
+        toast(e.message, 'error');
+        btn.textContent = 'Login to EzeLink';
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
