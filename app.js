@@ -1,4 +1,4 @@
-const API = 'http://localhost:8000';
+const API = 'https://ezelink.up.railway.app';
 
 const auth = {
   getToken:  () => localStorage.getItem('ez_token'),
