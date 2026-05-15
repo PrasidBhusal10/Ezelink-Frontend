@@ -198,10 +198,9 @@
       </div>
 
       <!-- Auth nudge -->
-      <div class="auth-nudge" id="auth-nudge">
-        You need an account to shorten URLs.
-        <a href="login.html">Login</a> or <a href="register.html">register free</a> to get started.
-      </div>
+      <div class="auth-nudge" id="auth-nudge" style="display:none">
+  💡 <a href="register.html">Create a free account</a> to save your links and see click analytics.
+</div>
     </div>
     <!-- Stats -->
     <div class="stats">
@@ -257,42 +256,44 @@
     }
 
     async function doShorten() {
-      if (!auth.isLoggedIn()) {
-        document.getElementById('auth-nudge').style.display = 'block';
-        return;
-      }
-      const url    = document.getElementById('url-input').value.trim();
-      const slug   = document.getElementById('custom-slug').value.trim();
-      const expiry = document.getElementById('expires-at').value;
-      const btn    = document.getElementById('shorten-btn');
+    const url = document.getElementById('url-input').value.trim();
+    if (!url) { toast('Please enter a URL first', 'error'); return; }
 
-      if (!url) { toast('Please enter a URL first', 'error'); return; }
+    const btn = document.getElementById('shorten-btn');
+    btn.innerHTML = '<span class="spinner"></span> Shortening…';
+    btn.disabled = true;
 
-      btn.innerHTML = '<span class="spinner"></span> Shortening…';
-      btn.disabled = true;
-
-      try {
+    try {
         const body = { url };
+        const slug   = document.getElementById('custom-slug').value.trim();
+        const expiry = document.getElementById('expires-at').value;
         if (slug)   body.custom_slug = slug;
         if (expiry) body.expires_at  = new Date(expiry).toISOString();
 
         const data = await api.post('/shorten', body);
-        saveSlug(data.slug);
+
+        // Save slug if logged in
+        if (auth.isLoggedIn()) saveSlug(data.slug);
 
         document.getElementById('result-url').textContent = data.short_url;
         document.getElementById('result-url').href        = data.short_url;
         document.getElementById('result-stats').href      = `analytics.html?slug=${data.slug}`;
         document.getElementById('result').classList.add('show');
-        document.getElementById('auth-nudge').style.display = 'none';
-        document.getElementById('url-input').value = '';
-        toast('Short link created! 🎉');
-      } catch(e) {
+
+        // Soft nudge to register — not a blocker
+        if (!auth.isLoggedIn()) {
+            toast('Link created! Register free to track clicks 📊');
+        } else {
+            toast('Short link created! 🎉');
+        }
+
+    } catch(e) {
         toast(e.message, 'error');
-      } finally {
+    } finally {
         btn.innerHTML = 'Shorten ✨';
         btn.disabled  = false;
-      }
     }
+}
 
     function copyResult(btn) {
       const url = document.getElementById('result-url').textContent;
