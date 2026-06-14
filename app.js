@@ -1,5 +1,4 @@
-const API = 'https://ezelink.up.railway.app';
-
+const API = 'https://api.ezelinks.com';
 const auth = {
   getToken:  () => localStorage.getItem('ez_token'),
   getEmail:  () => localStorage.getItem('ez_email'),
